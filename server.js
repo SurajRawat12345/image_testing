@@ -5,7 +5,40 @@ const multer = require('multer');
 const mongoose = require('mongoose');
 const morgan = require("morgan");
 const imageModel = require("./models/imageModel.js");
+const cloudinary = require('cloudinary').v2;
 
+const storage = multer.diskStorage({
+    filename: function(req, file, cb) {
+      cb(null, file.originalname);
+    }
+  });
+const upload = multer({ storage: storage });
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+/*
+router.post('/tweet', checkJwt, checkScopes(['write:tweet']), upload.single('image'), (req, res) => {
+  const { text } = req.body;
+  const userId = req.user.sub;
+  const imageUrl = req.file ? req.file.path : '';
+  const tweet = new Tweet({ text: text, userId: userId, imageUrl: imageUrl });
+  tweet.save()
+    .then(() => res.json({ message: 'Tweet created' }))
+    .catch(err => res.status(400).json({ error: err }));
+});
+router.get('/api/images', async (req, res) => {
+    try {
+      const result = await cloudinary.api.resources();
+      res.json(result.resources);
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ err: 'Something went wrong' });
+    }
+  });
+*/
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -18,6 +51,7 @@ app.use(express.json());
 app.use(morgan('dev'));
 app.use(express.static('public'));
 
+/*
 const storage = multer.diskStorage({
     destination:'./public/images', //directory (folder) setting
     filename:(req, file, cb)=>{
@@ -40,16 +74,31 @@ const upload = multer({
         }
     }
 })
-
+*/
 app.get("/" , async(req,res) => {
     res.status(200).json("Hello User")
 })
 //SINGALE IMAGE UPLODING
 app.post('/upload-image', upload.single('file'), async(req, res)=>{
+    try {
+        const result = await cloudinary.uploader.upload(req.file.path);
+        //const imageUrl = req.file ? req.file.path : '';
+        const abc = await imageModel(
+            {image: {
+                public_id : result.public_id, 
+                url : result.secure_url}
+            }).save();
+        res.json({ url: result.secure_url  , abc});
+      } catch (err) {
+        console.log(err);
+        res.status(500).json({ err: 'Something went wrong' });
+      }
+      /*
     try{
-        req.file
+        const imageUrl = req.file ? req.file.path : '';
+        //req.file
         //console.log(req.file);
-        const abc = await imageModel({image: req.file.filename}).save();
+        const abc = await imageModel({image: imageUrl}).save();
         res.status(200).send({
             success : true,
             msg : "Uploaded successfully",
@@ -63,10 +112,18 @@ app.post('/upload-image', upload.single('file'), async(req, res)=>{
             msg : "Error in uploading image",
             error,
         })
-    } 
+    } */
 })
 
 app.get("/get-images" , async(req,res) => {
+    try {
+        const result = await cloudinary.api.resources();
+        res.json(result.resources);
+      } catch (err) {
+        console.log(err);
+        res.status(500).json({ err: 'Something went wrong' });
+      }
+    /*
     try{
         const images = await imageModel.find({});
         res.status(200).send({
@@ -82,7 +139,7 @@ app.get("/get-images" , async(req,res) => {
             msg : "Error in Fetching image",
             error,
         })
-    }
+    }*/
 })
 app.get("/images/:id" , async(req,res) => {
     try{
