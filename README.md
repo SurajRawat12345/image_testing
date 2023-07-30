@@ -16,6 +16,18 @@ Live Link : https://64c664b2d8f4f30646567fe2--classy-kleicha-9516c8.netlify.app/
 
 <img src="https://img.shields.io/badge/IMAGE-Gallery-yellow?labelColor=crimson"> We can see all uploaded images based on pagging.
 
+# Technologies Used :
+  
+<ul>
+    <li> HTML </li>
+    <li> CSS </li>
+    <li> Javascript </li>
+    <li> Node.js </li>
+    <li> React.js </li>
+    <li> Express.js </li>
+    <li> MongoDB </li>
+</ul>
+
 # Packages Used :
 
 <ul>
